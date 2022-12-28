@@ -1,4 +1,4 @@
-from typing import Self, Iterable
+from typing import Self
 from pychess.piece import Piece
 from pychess.position import Position
 
@@ -36,10 +36,12 @@ class Board:
         return self.__piece_position.get(piece, None)
 
     def place(self, piece: Piece, position: Position) -> None:
-        current_piece = self.__table[position.y][position.x]
-        if current_piece is not None:
-            self.__piece_position.pop(current_piece)
-            current_piece.board = None
+        if (existing_piece := self.get_piece(position)) is not None:
+            self.__piece_position.pop(existing_piece)
+            existing_piece.board = None
+
+        if (piece_old_position := self.get_piece_position(piece)) is not None:
+            self.__table[piece_old_position.y][piece_old_position.x] = None
 
         self.__table[position.y][position.x] = piece
         self.__piece_position[piece] = position
