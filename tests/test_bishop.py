@@ -2,7 +2,7 @@ from pytest import raises, mark
 from pychess.board import Board
 from pychess.piece import Bishop
 from pychess.piece.errors import PieceOffTheBoardError
-from pychess.color import Color
+from pychess.piece.color import Color
 from pychess.position import Position
 
 

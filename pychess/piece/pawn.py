@@ -3,7 +3,7 @@ from itertools import chain
 from .piece import Piece
 from .direction import Direction
 from pychess.position import Position
-from pychess.color import Color
+from pychess.piece.color import Color
 
 
 class Pawn(Piece):

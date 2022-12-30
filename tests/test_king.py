@@ -1,6 +1,6 @@
 from pychess.piece import King
 from pychess.board import Board
-from pychess.color import Color
+from pychess.piece.color import Color
 from pychess.position import Position
 
 

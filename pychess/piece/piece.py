@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod, ABC
 from typing import Protocol, Callable, Iterable
-from pychess.color import Color
+from pychess.piece.color import Color
 from pychess.position import Position
 from .moves import Moves
 from .errors import PieceOffTheBoardError, MovimentNotAllowedError
