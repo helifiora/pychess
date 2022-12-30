@@ -1,10 +1,11 @@
 from pychess.position import Position
-
+from itertools import chain
 from .piece import Piece
-from .moves import Moves
 
 
 class Rook(Piece):
 
     def movements(self) -> list[Position]:
-        return list(Moves(self).lmove())
+        horizontal = self._moves.horizontal()
+        vertical = self._moves.vertical()
+        return list(chain(horizontal, vertical))

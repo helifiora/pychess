@@ -1,10 +1,9 @@
 from pychess.position import Position
 
-from .moves import Moves
-from .piece import Piece, Board
+from .piece import Piece
 
 
 class Knight(Piece):
 
     def movements(self) -> list[Position]:
-        return list(Moves(self).lmove())
+        return list(self._moves.lshape())

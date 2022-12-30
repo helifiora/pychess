@@ -39,7 +39,7 @@ class Position:
         return copy(self)
 
     @property
-    def is_inside_board(self) -> bool:
+    def inside_board(self) -> bool:
         return 0 <= self.x <= 7 and 0 <= self.y <= 7
 
     def __eq__(self, other: any) -> bool:
