@@ -1,4 +1,3 @@
-from pytest import raises
 from pychess.position import Position
 
 

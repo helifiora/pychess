@@ -1,7 +1,6 @@
-from pytest import raises, mark
+from pytest import mark
 from pychess.board import Board
 from pychess.piece import Bishop
-from pychess.piece.errors import PieceOffTheBoardError
 from pychess.piece.color import Color
 from pychess.position import Position
 
@@ -69,18 +68,6 @@ def test_moviments_when_piece_in_middle_corner_position(entry: Position, output:
     knight = Bishop(Color.BLACK)
     board.place(knight, entry)
     assert set(knight.movements()) == set(output)
-
-
-def test_movements_raises_offtheboarderror_when_piece_is_not_in_the_board():
-    rook = Bishop(Color.BLACK)
-    with raises(PieceOffTheBoardError):
-        rook.movements()
-
-
-def test_position_raises_offtheboarderror_when_piece_is_not_in_the_board():
-    rook = Bishop(Color.BLACK)
-    with raises(PieceOffTheBoardError):
-        assert rook.position
 
 
 @mark.parametrize('entries, output', [

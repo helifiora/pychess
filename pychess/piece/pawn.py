@@ -20,7 +20,7 @@ class Pawn(Piece):
 
     def movements(self) -> Iterable[Position]:
         take = 2 if self.first_move else 1
-        direction = Direction.BOTTOM if Color.BLACK else Direction.TOP
+        direction = Direction.BOTTOM if self.color == Color.BLACK else Direction.TOP
 
         vertical = self._moves.vertical(direction=direction, take=take)
         diagonal = self._moves.diagonal(direction=direction, take=1, accept=self.__accept)
