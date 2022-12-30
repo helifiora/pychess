@@ -3,11 +3,22 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .piece import Piece
+    from pychess.position import Position
 
 
 class PieceOffTheBoardError(Exception):
-    __piece: Piece
+    piece: Piece
 
-    def __init__(self, piece: Piece) -> None:
+    def __init__(self, piece: Piece):
         super().__init__()
-        self.__piece = piece
+        self.piece = piece
+
+
+class MovimentNotAllowedError(Exception):
+    piece: Piece
+    position: Position
+
+    def __init__(self, piece: Piece, position: Position):
+        super().__init__()
+        self.piece = piece
+        self.position = position

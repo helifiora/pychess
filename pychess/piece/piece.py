@@ -1,13 +1,17 @@
 from __future__ import annotations
 from abc import abstractmethod, ABC
-from typing import Protocol, Callable, Iterator
+from typing import Protocol, Callable, Iterable
 from pychess.color import Color
 from pychess.position import Position
 from .moves import Moves
-from .errors import PieceOffTheBoardError
+from .errors import PieceOffTheBoardError, MovimentNotAllowedError
 
 
 class Board(Protocol):
+
+    @abstractmethod
+    def place(self, piece: Piece, position: Position) -> None:
+        ...
 
     @abstractmethod
     def get_piece(self, position: Position) -> Piece | None:
@@ -22,7 +26,7 @@ class Board(Protocol):
             self,
             /, origin: Position, positions: list[Position],
             *, accept: Callable[[Piece | None], bool] | None = None
-    ) -> Iterator[Position | None]:
+    ) -> Iterable[Position | None]:
         ...
 
     @abstractmethod
@@ -31,7 +35,7 @@ class Board(Protocol):
             /, origin: Position, increment: Position,
             *, accept: Callable[[Piece | None], bool] | None = None, stop: Callable[[Piece | None], bool] | None = None,
             take: int | None = None
-    ) -> Iterator[Position | None]:
+    ) -> Iterable[Position | None]:
         ...
 
 
@@ -72,6 +76,12 @@ class Piece(ABC):
     def onboard(self) -> bool:
         return self.__board is not None
 
+    def move(self, position: Position) -> None:
+        if position not in set(self.movements()):
+            raise MovimentNotAllowedError(self, position)
+
+        self.board.place(self, position)
+
     @abstractmethod
-    def movements(self) -> list[Position]:
+    def movements(self) -> Iterable[Position]:
         ...

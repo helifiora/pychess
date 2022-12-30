@@ -1,15 +1,17 @@
 from .piece import Piece
-from .rook import Rook
-from .knight import Knight
 from .bishop import Bishop
-from .queen import Queen
 from .king import King
+from .knight import Knight
+from .pawn import Pawn
+from .queen import Queen
+from .rook import Rook
 
 __all__ = [
-    'Piece',
-    'Rook',
-    'Knight',
     'Bishop',
+    'King',
+    'Knight',
+    'Pawn',
+    'Piece',
     'Queen',
-    'King'
+    "Rook"
 ]

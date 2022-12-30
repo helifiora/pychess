@@ -1,11 +1,10 @@
 from pychess.position import Position
+from typing import Iterable
 
 from .piece import Piece
-from .moves import Moves
 
 
 class Bishop(Piece):
 
-    def movements(self) -> list[Position]:
-        moves = Moves(self)
-        return list(moves.diagonal())
+    def movements(self) -> Iterable[Position]:
+        return self._moves.diagonal()
