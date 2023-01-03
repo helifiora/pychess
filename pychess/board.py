@@ -99,10 +99,7 @@ class Board:
         if accept is not None:
             return accept(target)
 
-        if target is None:
-            return True
-
-        if origin is None:
+        if target is None or origin is None:
             return True
 
         return origin.color != target.color

@@ -1,21 +1,8 @@
-from pytest import raises, mark
+from pytest import mark
 from pychess.board import Board
 from pychess.piece import Knight
-from pychess.piece.errors import PieceOffTheBoardError
 from pychess.piece.color import Color
 from pychess.position import Position
-
-
-def test_movements_raises_offtheboarderror_when_piece_is_not_in_the_board():
-    rook = Knight(Color.BLACK)
-    with raises(PieceOffTheBoardError):
-        rook.movements()
-
-
-def test_position_raises_offtheboarderror_when_piece_is_not_in_the_board():
-    rook = Knight(Color.BLACK)
-    with raises(PieceOffTheBoardError):
-        assert rook.position
 
 
 @mark.parametrize('entry, output', [

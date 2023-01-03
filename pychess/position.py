@@ -16,6 +16,19 @@ class Position:
         self.x = x
         self.y = y
 
+    def __lt__(self, other: 'Position') -> bool:
+        if not isinstance(other, Position):
+            return False
+
+        if self.y < other.y:
+            return True
+
+        if self.y > other.y:
+            return False
+
+        if self.x < other.x:
+            return True
+
     @classmethod
     def from_entry(cls, entry_row: str, entry_column: str) -> Self:
         """
