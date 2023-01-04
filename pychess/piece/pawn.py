@@ -27,5 +27,5 @@ class Pawn(Piece):
 
         return chain(vertical, diagonal)
 
-    def __accept(self, target: Piece | None) -> bool:
+    def __accept(self, target: Piece | None, _: Position) -> bool:
         return target is not None and target.color != self.color

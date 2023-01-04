@@ -27,10 +27,13 @@ class Moves:
 
         return self.__board.iterate_values(origin, increments)
 
-    def horizontal(self, *, take: int | None = None) -> Iterable[Position]:
+    def horizontal(
+            self, *,
+            take: int | None = None,
+            accept: Callable[[Piece | None], bool] | None = None) -> Iterable[Position]:
         origin = self.__piece.position
-        left = self.__board.iterate(origin, Position(-1, 0), take=take)
-        right = self.__board.iterate(origin, Position(1, 0), take=take)
+        left = self.__board.iterate(origin, Position(-1, 0), take=take, accept=accept)
+        right = self.__board.iterate(origin, Position(1, 0), take=take, accept=accept)
         return chain(left, right)
 
     def vertical(

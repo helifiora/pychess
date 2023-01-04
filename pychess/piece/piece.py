@@ -18,6 +18,10 @@ class Board(Protocol):
         ...
 
     @abstractmethod
+    def get_pieces(self, color: Color) -> list[Piece]:
+        ...
+
+    @abstractmethod
     def get_piece_position(self, piece: Piece) -> Position | None:
         ...
 
@@ -33,8 +37,10 @@ class Board(Protocol):
     def iterate(
             self,
             /, origin: Position, increment: Position,
-            *, accept: Callable[[Piece | None], bool] | None = None, stop: Callable[[Piece | None], bool] | None = None,
-            take: int | None = None
+            *, take: int | None = None,
+            accept: Callable[[Piece | None, Position], bool] | None = None,
+            stop: Callable[[Piece | None], bool] | None = None,
+
     ) -> Iterable[Position | None]:
         ...
 
@@ -51,6 +57,13 @@ class Piece(ABC):
 
     @property
     def board(self) -> Board:
+        """
+        :raises: PieceOffTheBoardError
+        :return: The board of the piece
+        """
+        if self.__board is None:
+            raise PieceOffTheBoardError(self)
+
         return self.__board
 
     @board.setter

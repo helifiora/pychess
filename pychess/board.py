@@ -1,11 +1,12 @@
 from typing import Self, Iterator, Callable
 from pychess.piece import Piece
 from pychess.position import Position
+from pychess.piece.color import Color
 
 Table = list[list[Piece | None]]
 PiecePosition = dict[Piece, Position]
 
-AcceptFn = Callable[[Piece | None], bool]
+AcceptFn = Callable[[Piece | None, Position], bool]
 StopFn = Callable[[Piece | None], bool]
 
 
@@ -38,6 +39,9 @@ class Board:
     def get_piece_position(self, piece: Piece) -> Position | None:
         return self.__piece_position.get(piece, None)
 
+    def get_pieces(self, color: Color) -> list[Piece]:
+        return [piece for piece in self.__piece_position.keys() if piece.color == color]
+
     def place(self, piece: Piece, position: Position) -> None:
         if (existing_piece := self.get_piece(position)) is not None:
             self.__piece_position.pop(existing_piece)
@@ -49,7 +53,7 @@ class Board:
         self.__table[position.y][position.x] = piece
         self.__piece_position[piece] = position
 
-        if piece.board != self:
+        if not piece.onboard or piece.board != self:
             piece.board = self
 
     def iterate_values(
@@ -67,7 +71,7 @@ class Board:
                 return False
 
             target = self.get_piece(position)
-            return self.__can_accept(origin_piece, target, accept)
+            return self.__can_accept(origin_piece, target, position, accept)
 
         mapped = map(map_fn, positions)
         return filter(filter_fn, mapped)
@@ -85,7 +89,7 @@ class Board:
         while current.inside_board and self.__can_take(cells, take):
             target = self.get_piece(current)
 
-            if self.__can_accept(origin_piece, target, accept):
+            if self.__can_accept(origin_piece, target, current, accept):
                 yield current.clone()
 
             if self.__can_stop(target, stop):
@@ -95,9 +99,9 @@ class Board:
             current += increment
 
     @staticmethod
-    def __can_accept(origin: Piece | None, target: Piece | None, accept: AcceptFn) -> bool:
+    def __can_accept(origin: Piece | None, target: Piece | None, position: Position, accept: AcceptFn) -> bool:
         if accept is not None:
-            return accept(target)
+            return accept(target, position)
 
         if target is None or origin is None:
             return True
