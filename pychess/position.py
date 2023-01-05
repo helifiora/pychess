@@ -3,8 +3,6 @@ from typing import Self
 
 from pychess.entry import ENTRY_COLUMN_VALUE, ENTRY_ROW_VALUE
 
-PositionTuple = tuple[int, int]
-
 
 class Position:
     __slots__ = ['x', 'y']
@@ -32,8 +30,8 @@ class Position:
     @classmethod
     def from_entry(cls, entry_row: str, entry_column: str) -> Self:
         """
-        :param entry_row: accepts '1', '2', '3', '4', '5', '6', '7', '8'
-        :param entry_column: accepts 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'
+        :param entry_row: '1', '2', '3', '4', '5', '6', '7', '8'
+        :param entry_column: 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'
         :return: Position
         """
 
@@ -43,10 +41,6 @@ class Position:
             return cls(column, row)
         except Exception:
             raise ValueError('Erro ao criar position')
-
-    @classmethod
-    def from_tuple(cls, value: PositionTuple) -> Self:
-        return cls(value[0], value[1])
 
     def clone(self) -> Self:
         return copy(self)

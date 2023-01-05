@@ -58,8 +58,9 @@ class Piece(ABC):
     @property
     def board(self) -> Board:
         """
-        :raises: PieceOffTheBoardError
-        :return: The board of the piece
+        Get the current board of the piece
+        :raises PieceOffTheBoardError
+        :return: Board
         """
         if self.__board is None:
             raise PieceOffTheBoardError(self)
@@ -68,10 +69,18 @@ class Piece(ABC):
 
     @board.setter
     def board(self, value: Board | None) -> None:
+        """
+        Define the board to the piece
+        :param value: a Board or None
+        """
         self.__board = value
 
     @property
     def color(self) -> Color:
+        """
+        Get the color of the piece
+        :return: Color
+        """
         return self.__color
 
     @property
@@ -87,9 +96,18 @@ class Piece(ABC):
 
     @property
     def onboard(self) -> bool:
+        """
+        Inform if piece is on a board
+        :return: bool
+        """
         return self.__board is not None
 
     def move(self, position: Position) -> None:
+        """
+        Move the piece to an available position
+        :param position: new position to the piece
+        :raises MovimentNotAllowedError, PieceOffTheBoardError
+        """
         if position not in set(self.movements()):
             raise MovimentNotAllowedError(self, position)
 
@@ -97,4 +115,8 @@ class Piece(ABC):
 
     @abstractmethod
     def movements(self) -> Iterable[Position]:
+        """
+        Return all availbale positions that the piece has
+        :return: iterator with available positions
+        """
         ...
