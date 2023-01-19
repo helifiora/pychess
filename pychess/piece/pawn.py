@@ -7,19 +7,9 @@ from pychess.color import Color
 
 
 class Pawn(Piece):
-    first_move: bool
-
-    def __init__(self, /, color: Color):
-        super().__init__(color)
-        self.first_move = True
-
-    def move(self, position: Position) -> None:
-        super().move(position)
-        if self.first_move:
-            self.first_move = False
 
     def movements(self) -> Iterable[Position]:
-        take = 2 if self.first_move else 1
+        take = 2 if self.__first_move else 1
         direction = Direction.BOTTOM if self.color == Color.BLACK else Direction.TOP
 
         vertical = self._moves.vertical(direction=direction, take=take)
@@ -29,3 +19,7 @@ class Pawn(Piece):
 
     def __accept(self, target: Piece | None, _: Position) -> bool:
         return target is not None and target.color != self.color
+
+    @property
+    def __first_move(self) -> bool:
+        return self.move_count == 0

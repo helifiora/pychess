@@ -36,7 +36,7 @@ def test_black_pawn_move_bottom(entry: Position, output: list[Position]):
     pawn = Pawn(Color.BLACK)
     board = Board.empty()
     board.place(pawn, entry)
-    pawn.first_move = False
+    pawn.increment_move_count()
     assert set(pawn.movements()) == set(output)
 
 
@@ -54,7 +54,7 @@ def test_black_pawn_move_bottom_and_diagonal_enemy(entry: Position, others: list
     pawn = Pawn(Color.BLACK)
     board = Board.empty()
     board.place(pawn, entry)
-    pawn.first_move = False
+    pawn.increment_move_count()
 
     for other in others:
         board.place(Pawn(Color.WHITE), other)
@@ -112,7 +112,7 @@ def test_white_pawn_move_top(entry: Position, output: list[Position]):
     pawn = Pawn(Color.WHITE)
     board = Board.empty()
     board.place(pawn, entry)
-    pawn.first_move = False
+    pawn.increment_move_count()
     assert set(pawn.movements()) == set(output)
 
 
@@ -130,7 +130,7 @@ def test_white_pawn_move_top_and_diagonal_enemy(entry: Position, others: list[Po
     pawn = Pawn(Color.WHITE)
     board = Board.empty()
     board.place(pawn, entry)
-    pawn.first_move = False
+    pawn.increment_move_count()
 
     for other in others:
         board.place(Pawn(Color.BLACK), other)

@@ -26,24 +26,24 @@ class Board(Protocol):
 
     @abstractmethod
     def viterator(
-        self,
-        /,
-        origin: Position,
-        positions: list[Position],
-        *,
-        accept: Callable[[Piece | None, Position], bool] | None = None,
+            self,
+            /,
+            origin: Position,
+            positions: list[Position],
+            *,
+            accept: Callable[[Piece | None, Position], bool] | None = None,
     ) -> Iterator[Position]:
         ...
 
     @abstractmethod
     def iterator(
-        self,
-        /,
-        origin: Position,
-        increment: Callable[[Position], Position],
-        *,
-        take: int | None = None,
-        accept: Callable[[Piece | None, Position], bool] | None = None,
+            self,
+            /,
+            origin: Position,
+            increment: Callable[[Position], Position],
+            *,
+            take: int | None = None,
+            accept: Callable[[Piece | None, Position], bool] | None = None,
     ) -> Iterator[Position]:
         ...
 
@@ -51,11 +51,13 @@ class Board(Protocol):
 class Piece(ABC):
     __board: Board | None
     __color: Color
+    __move_count: int
     _moves: Moves
 
     def __init__(self, /, color: Color):
         self.__color = color
         self.__board = None
+        self.__move_count = 0
         self._moves = Moves(self)
 
     @property
@@ -109,16 +111,31 @@ class Piece(ABC):
         """
         return self.__board is not None
 
+    @property
+    def has_movements(self) -> bool:
+        return any(self.movements())
+
+    @property
+    def move_count(self) -> int:
+        return self.__move_count
+
+    def increment_move_count(self) -> None:
+        self.__move_count += 1
+
     def move(self, position: Position) -> None:
         """
         Move the piece to an available position
         :param position: new position to the piece
         :raises MovimentNotAllowedError, PieceOffTheBoardError
         """
-        if position not in set(self.movements()):
+        if not self.can_move_to(position):
             raise MovimentNotAllowedError(self, position)
 
         self.board.place(self, position)
+        self.increment_move_count()
+
+    def can_move_to(self, position: Position) -> bool:
+        return position in set(self.movements())
 
     @abstractmethod
     def movements(self) -> Iterable[Position]:
