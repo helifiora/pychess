@@ -1,7 +1,7 @@
 from itertools import chain
 from pychess.position import Position
 from .piece import Piece
-from .color import Color
+from pychess.color import Color
 from typing import Iterable, Callable
 from functools import reduce
 

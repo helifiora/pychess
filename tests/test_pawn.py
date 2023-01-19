@@ -2,7 +2,7 @@ from pytest import mark
 from pychess.piece import Pawn
 from pychess.board import Board
 from pychess.position import Position
-from pychess.piece.color import Color
+from pychess.color import Color
 
 
 @mark.parametrize('entry, output', [

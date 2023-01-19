@@ -1,7 +1,7 @@
 from pytest import mark
 from pychess.board import Board
 from pychess.piece import Bishop
-from pychess.piece.color import Color
+from pychess.color import Color
 from pychess.position import Position
 
 

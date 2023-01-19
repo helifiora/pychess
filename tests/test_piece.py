@@ -2,7 +2,7 @@ from pytest import raises, mark
 from pychess.piece import *
 from pychess.piece.errors import PieceOffTheBoardError, MovimentNotAllowedError
 from pychess.board import Board
-from pychess.piece.color import Color
+from pychess.color import Color
 from pychess.position import Position
 
 

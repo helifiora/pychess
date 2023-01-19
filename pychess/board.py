@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from typing import Self, Iterator, Callable
 from pychess.piece import Piece
 from pychess.position import Position
-from pychess.piece.color import Color
+from pychess.color import Color
 
 Table = list[list[Piece | None]]
 PiecePosition = dict[Piece, Position]
@@ -20,7 +22,7 @@ class Board:
 
     @classmethod
     def empty(cls) -> Self:
-        table = [
+        table: Table = [
             [None, None, None, None, None, None, None, None],
             [None, None, None, None, None, None, None, None],
             [None, None, None, None, None, None, None, None],
@@ -56,65 +58,119 @@ class Board:
         if not piece.onboard or piece.board != self:
             piece.board = self
 
-    def iterate_values(
+    def viterator(
             self,
-            /, origin: Position, positions: list[Position],
-            *, accept: AcceptFn | None = None
-    ) -> Iterator[Position | None]:
+            /,
+            origin: Position,
+            positions: list[Position],
+            *,
+            accept: AcceptFn | None = None,
+    ) -> Iterator[Position]:
         origin_piece = self.get_piece(origin)
 
         def map_fn(increment: Position) -> Position:
             return origin + increment
 
-        def filter_fn(position: Position) -> bool:
-            if not position.inside_board:
+        def filter_fn(current: Position) -> bool:
+            if not current.inside_board:
                 return False
 
-            target = self.get_piece(position)
-            return self.__can_accept(origin_piece, target, position, accept)
+            current_position = self.get_piece(current)
+            if accept is not None:
+                return accept(current_position, current)
+
+            if origin_piece is None or current_position is None:
+                return True
+
+            return origin_piece.color != current_position.color
 
         mapped = map(map_fn, positions)
         return filter(filter_fn, mapped)
 
-    def iterate(
+    def iterator(
             self,
-            /, origin: Position, increment: Position,
-            *, accept: AcceptFn | None = None, stop: StopFn | None = None, take: int | None = None
-    ) -> Iterator[Position | None]:
+            /,
+            origin: Position,
+            increment: Callable[[Position], Position],
+            *,
+            take: int | None = None,
+            accept: AcceptFn | None = None,
+    ) -> Iterator[Position]:
+        return BoardIterator(self, origin, increment, take, accept)
 
-        cells = 1
-        origin_piece = self.get_piece(origin)
-        current = origin + increment
 
-        while current.inside_board and self.__can_take(cells, take):
-            target = self.get_piece(current)
+class BoardIterator:
+    __board: Board
+    __current: Position
+    __origin: Position
+    __increment_fn: Callable[[Position], Position]
+    __take: int | None = None
+    __accept_fn: AcceptFn | None
+    __iterations: int
+    __is_stopped: bool
 
-            if self.__can_accept(origin_piece, target, current, accept):
-                yield current.clone()
+    def __init__(
+            self,
+            board: Board,
+            origin: Position,
+            increment_fn: Callable[[Position], Position],
+            take: int | None = None,
+            accept_fn: AcceptFn | None = None,
+    ) -> None:
+        self.__board = board
+        self.__current = origin.clone()
+        self.__origin = origin
+        self.__increment_fn = increment_fn
+        self.__take = take
+        self.__accept_fn = accept_fn
+        self.__iterations = 1
+        self.__is_stopped = False
 
-            if self.__can_stop(target, stop):
-                break
+    def __iter__(self) -> Self:
+        return self
 
-            cells += 1
-            current += increment
+    def __next__(self) -> Position:
 
-    @staticmethod
-    def __can_accept(origin: Piece | None, target: Piece | None, position: Position, accept: AcceptFn) -> bool:
-        if accept is not None:
-            return accept(target, position)
+        if self.__is_stopped or not self.__can_take:
+            raise StopIteration
 
-        if target is None or origin is None:
+        self.__increment()
+
+        if not self.__current.inside_board or not self.__can_accept:
+            raise StopIteration
+
+        if self.__can_stop:
+            self.__is_stopped = True
+
+        return self.__current.clone()
+
+    @property
+    def __current_piece(self) -> Piece | None:
+        return self.__board.get_piece(self.__current)
+
+    @property
+    def __origin_piece(self) -> Piece | None:
+        return self.__board.get_piece(self.__origin)
+
+    @property
+    def __can_take(self) -> bool:
+        return self.__take is None or self.__iterations <= self.__take
+
+    @property
+    def __can_accept(self) -> bool:
+
+        if self.__accept_fn is not None:
+            return self.__accept_fn(self.__current_piece, self.__current)
+
+        if self.__current_piece is None or self.__origin_piece is None:
             return True
 
-        return origin.color != target.color
+        return self.__current_piece.color != self.__origin_piece.color
 
-    @staticmethod
-    def __can_take(count: int, limit: int | None) -> bool:
-        return limit is None or count <= limit
+    @property
+    def __can_stop(self) -> bool:
+        return self.__current_piece is not None
 
-    @staticmethod
-    def __can_stop(target: Position | None, stop: StopFn | None) -> bool:
-        if stop is not None:
-            return stop(target)
-
-        return target is not None
+    def __increment(self) -> None:
+        self.__current = self.__increment_fn(self.__current)
+        self.__iterations += 1

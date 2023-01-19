@@ -1,6 +1,6 @@
 from pychess.piece import King, Rook, Bishop
 from pychess.board import Board
-from pychess.piece.color import Color
+from pychess.color import Color
 from pychess.position import Position
 from pytest import mark
 

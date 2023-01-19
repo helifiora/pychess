@@ -1,14 +1,13 @@
 from __future__ import annotations
 from abc import abstractmethod, ABC
-from typing import Protocol, Callable, Iterable
-from pychess.piece.color import Color
+from typing import Iterator, Protocol, Callable, Iterable
+from pychess.color import Color
 from pychess.position import Position
 from .moves import Moves
 from .errors import PieceOffTheBoardError, MovimentNotAllowedError
 
 
 class Board(Protocol):
-
     @abstractmethod
     def place(self, piece: Piece, position: Position) -> None:
         ...
@@ -26,22 +25,26 @@ class Board(Protocol):
         ...
 
     @abstractmethod
-    def iterate_values(
-            self,
-            /, origin: Position, positions: list[Position],
-            *, accept: Callable[[Piece | None], bool] | None = None
-    ) -> Iterable[Position | None]:
+    def viterator(
+        self,
+        /,
+        origin: Position,
+        positions: list[Position],
+        *,
+        accept: Callable[[Piece | None, Position], bool] | None = None,
+    ) -> Iterator[Position]:
         ...
 
     @abstractmethod
-    def iterate(
-            self,
-            /, origin: Position, increment: Position,
-            *, take: int | None = None,
-            accept: Callable[[Piece | None, Position], bool] | None = None,
-            stop: Callable[[Piece | None], bool] | None = None,
-
-    ) -> Iterable[Position | None]:
+    def iterator(
+        self,
+        /,
+        origin: Position,
+        increment: Callable[[Position], Position],
+        *,
+        take: int | None = None,
+        accept: Callable[[Piece | None, Position], bool] | None = None,
+    ) -> Iterator[Position]:
         ...
 
 
@@ -92,7 +95,11 @@ class Piece(ABC):
         if self.__board is None:
             raise PieceOffTheBoardError(self)
 
-        return self.__board.get_piece_position(self)
+        position = self.__board.get_piece_position(self)
+        if position is None:
+            raise PieceOffTheBoardError(self)
+
+        return position
 
     @property
     def onboard(self) -> bool:
