@@ -28,6 +28,8 @@ class Position:
 
         if self.x < other.x:
             return True
+        
+        return False
 
     @classmethod
     def from_entry(cls, entry_row: str, entry_column: str) -> Self:
@@ -45,7 +47,7 @@ class Position:
     def inside_board(self) -> bool:
         return 0 <= self.x <= 7 and 0 <= self.y <= 7
 
-    def __eq__(self, other: any) -> bool:
+    def __eq__(self, other: Position) -> bool:
         return isinstance(other, Position) and self.x == other.x and self.y == other.y
 
     def __hash__(self) -> int:

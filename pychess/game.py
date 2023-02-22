@@ -1,4 +1,4 @@
-from typing import Protocol, Iterable
+from typing import Protocol, Iterable, Iterator
 
 from pychess.color import Color
 from pychess.board import Board
@@ -7,7 +7,6 @@ from pychess.piece import Rook, Knight, King, Bishop, Pawn, Queen, Piece
 
 
 class PieceGame(Protocol):
-
     @property
     def color(self) -> Color:
         raise NotImplemented()
@@ -28,14 +27,18 @@ class PieceCanNotMoveError(Exception):
     ...
 
 
+class PieceMoveCauseCheckError(Exception):
+    ...
+
+
 class Game:
     __board: Board
     __turn: Color
     __captured: set[PieceGame]
 
-    def __init__(self):
-        self.__board = self.create_board()
-        self.__turn = Color.WHITE
+    def __init__(self, *, board: Board | None = None, turn: Color | None = None):
+        self.__board = board or self.create_board()
+        self.__turn = turn or Color.WHITE
         self.__captured = set()
 
     @property
@@ -50,20 +53,24 @@ class Game:
         if piece.color != self.__turn:
             raise AnotherTeamTurnError()
 
-        return list(piece.movements())
+        def wrapper(new_position: Position) -> bool:
+            return not self.__is_move_apply_check(position, new_position)
+
+        return list(filter(wrapper, piece.movements()))
 
     def play(self, source: Position, target: Position) -> None:
-
         piece = self.__select_source_piece(source)
         old_value = self.__select_target_piece(target)
 
+        if self.__is_move_apply_check(source, target):
+            raise PieceMoveCauseCheckError()
+
         piece.move(target)
 
-        # TODO: verificar jogadas especiais como a troca entre Roque
-        if old_value is not None and not old_value.onboard:
+        if old_value and old_value.outboard:
             self.__captured.add(old_value)
 
-        self.__turn = Color.BLACK if self.__turn == Color.WHITE else Color.WHITE
+        self.__change_turn()
 
     def __select_source_piece(self, source: Position) -> Piece:
         piece = self.__board.get_piece(source)
@@ -78,8 +85,33 @@ class Game:
 
         return piece
 
+    def __change_turn(self) -> None:
+        self.__turn = self.__turn.inverse()
+
     def __select_target_piece(self, target: Position) -> Piece | None:
         return self.__board.get_piece(target)
+
+    def __is_move_apply_check(self, origin: Position, target: Position) -> bool:
+        board_copy = self.__board.clone()
+        piece_copy = board_copy.get_piece(origin)
+        if piece_copy is None:
+            return False
+
+        if not piece_copy.can_move_to(target):
+            return False
+
+        board_copy.place(piece_copy, target)
+        return self.check(board_copy, self.__turn)
+
+    @staticmethod
+    def check(board: Board, color: Color) -> bool:
+        opponent_pieces = board.get_pieces(color.inverse())
+        king_position = board.get_king(color).position
+
+        def is_king_in_movements(piece: Piece) -> bool:
+            return king_position in piece.movements()
+
+        return any(map(is_king_in_movements, opponent_pieces))
 
     @staticmethod
     def create_board() -> Board:

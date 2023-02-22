@@ -16,5 +16,5 @@ def increment(entry: Position) -> Position:
     return entry + Position(1, 0)
 
 
-for position in b.iterator(origin, increment, take=1):
+for position in b.iterator(origin, increment):
     print(position)

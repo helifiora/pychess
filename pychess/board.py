@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from typing import Self, Iterator, Callable
-from pychess.piece import Piece
+from pychess.piece import Piece, King
 from pychess.position import Position
 from pychess.color import Color
+from copy import deepcopy
 
 Table = list[list[Piece | None]]
 PiecePosition = dict[Piece, Position]
@@ -41,6 +42,18 @@ class Board:
     def get_piece_position(self, piece: Piece) -> Position | None:
         return self.__piece_position.get(piece, None)
 
+    def get_king(self, color: Color) -> Piece:
+        king = [
+            piece
+            for piece in self.__piece_position.keys()
+            if piece.color == color and isinstance(piece, King)
+        ]
+
+        if len(king) != 1:
+            raise Exception(f"Erro, {len(king)}")
+
+        return king[0]
+
     def get_pieces(self, color: Color) -> list[Piece]:
         return [piece for piece in self.__piece_position.keys() if piece.color == color]
 
@@ -59,12 +72,12 @@ class Board:
             piece.board = self
 
     def viterator(
-            self,
-            /,
-            origin: Position,
-            positions: list[Position],
-            *,
-            accept: AcceptFn | None = None,
+        self,
+        /,
+        origin: Position,
+        positions: list[Position],
+        *,
+        accept: AcceptFn | None = None,
     ) -> Iterator[Position]:
         origin_piece = self.get_piece(origin)
 
@@ -88,15 +101,18 @@ class Board:
         return filter(filter_fn, mapped)
 
     def iterator(
-            self,
-            /,
-            origin: Position,
-            increment: Callable[[Position], Position],
-            *,
-            take: int | None = None,
-            accept: AcceptFn | None = None,
+        self,
+        /,
+        origin: Position,
+        increment: Callable[[Position], Position],
+        *,
+        take: int | None = None,
+        accept: AcceptFn | None = None,
     ) -> Iterator[Position]:
         return BoardIterator(self, origin, increment, take, accept)
+
+    def clone(self) -> Board:
+        return deepcopy(self)
 
 
 class BoardIterator:
@@ -110,12 +126,12 @@ class BoardIterator:
     __is_stopped: bool
 
     def __init__(
-            self,
-            board: Board,
-            origin: Position,
-            increment_fn: Callable[[Position], Position],
-            take: int | None = None,
-            accept_fn: AcceptFn | None = None,
+        self,
+        board: Board,
+        origin: Position,
+        increment_fn: Callable[[Position], Position],
+        take: int | None = None,
+        accept_fn: AcceptFn | None = None,
     ) -> None:
         self.__board = board
         self.__current = origin.clone()
@@ -130,7 +146,6 @@ class BoardIterator:
         return self
 
     def __next__(self) -> Position:
-
         if self.__is_stopped or not self.__can_take:
             raise StopIteration
 
@@ -158,7 +173,6 @@ class BoardIterator:
 
     @property
     def __can_accept(self) -> bool:
-
         if self.__accept_fn is not None:
             return self.__accept_fn(self.__current_piece, self.__current)
 

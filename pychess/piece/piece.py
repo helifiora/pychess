@@ -26,24 +26,24 @@ class Board(Protocol):
 
     @abstractmethod
     def viterator(
-            self,
-            /,
-            origin: Position,
-            positions: list[Position],
-            *,
-            accept: Callable[[Piece | None, Position], bool] | None = None,
+        self,
+        /,
+        origin: Position,
+        positions: list[Position],
+        *,
+        accept: Callable[[Piece | None, Position], bool] | None = None,
     ) -> Iterator[Position]:
         ...
 
     @abstractmethod
     def iterator(
-            self,
-            /,
-            origin: Position,
-            increment: Callable[[Position], Position],
-            *,
-            take: int | None = None,
-            accept: Callable[[Piece | None, Position], bool] | None = None,
+        self,
+        /,
+        origin: Position,
+        increment: Callable[[Position], Position],
+        *,
+        take: int | None = None,
+        accept: Callable[[Piece | None, Position], bool] | None = None,
     ) -> Iterator[Position]:
         ...
 
@@ -110,6 +110,14 @@ class Piece(ABC):
         :return: bool
         """
         return self.__board is not None
+
+    @property
+    def outboard(self) -> bool:
+        """
+        Inform is piece is off the board
+        :return: bool
+        """
+        return self.__board is None
 
     @property
     def has_movements(self) -> bool:
