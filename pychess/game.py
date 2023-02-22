@@ -34,16 +34,26 @@ class PieceMoveCauseCheckError(Exception):
 class Game:
     __board: Board
     __turn: Color
-    __captured: set[PieceGame]
+    __captured: set[Piece]
+    __check: Color | None
 
     def __init__(self, *, board: Board | None = None, turn: Color | None = None):
         self.__board = board or self.create_board()
         self.__turn = turn or Color.WHITE
         self.__captured = set()
+        self.__check = None
 
     @property
     def turn(self) -> Color:
         return self.__turn
+
+    @property
+    def check(self) -> Color | None:
+        return self.__check
+
+    @property
+    def captured(self) -> set[Piece]:
+        return self.__captured
 
     def select_piece_moves(self, position: Position) -> list[Position]:
         piece = self.__board.get_piece(position)
@@ -71,6 +81,9 @@ class Game:
             self.__captured.add(old_value)
 
         self.__change_turn()
+
+        if self.is_check(self.__board.clone(), self.__turn):
+            self.__check = self.__turn
 
     def __select_source_piece(self, source: Position) -> Piece:
         piece = self.__board.get_piece(source)
@@ -101,10 +114,10 @@ class Game:
             return False
 
         board_copy.place(piece_copy, target)
-        return self.check(board_copy, self.__turn)
+        return self.is_check(board_copy, self.__turn)
 
     @staticmethod
-    def check(board: Board, color: Color) -> bool:
+    def is_check(board: Board, color: Color) -> bool:
         opponent_pieces = board.get_pieces(color.inverse())
         king_position = board.get_king(color).position
 
